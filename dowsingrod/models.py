@@ -1,6 +1,7 @@
 from datetime import datetime
 from peewee import *
-from dowsingrod import db
+
+from dowsingrod.app import db
 
 
 class User(db.Model):

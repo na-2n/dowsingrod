@@ -1,0 +1,9 @@
+ujson
+requests
+peewee
+flask
+flask_peewee
+flask_redis
+flask_login
+flask_limiter
+flask_wtf

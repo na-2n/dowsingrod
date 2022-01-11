@@ -1,38 +1,37 @@
-import requests
-
 try:
     import ujson as json
 except:
     import json
 
-from furl import furl
 from dataclasses import dataclass
-from urllib.parse import urlencode
-from typing import Optional, Collection, Sequence
+from typing import Any, Optional, Sequence, List
 from datetime import datetime
+
+from dowsingrod.api_base import ApiBase
 
 
 @dataclass
 class Post:
     id: int
-    created_at: float
-    uploader_id: int
-    score: int
+    created_at: datetime
+    #uploader_id
+    #score: int
     source: str
-    md5: str
+    #md5
     #last_comment_bumped_at
     rating: str
     image_width: int
     image_height: int
-    tags: list[str]
+    #tag_string
+    tags: List[str]
     #is_note_locked
     #fav_count
     file_ext: str
     #last_noted_at
     #is_rating_locked
-    parent_id: int
-    has_children: bool
-    approver_id: int
+    #parent_id
+    #has_children
+    #approver_id
     #tag_count_general
     #tag_count_artist
     #tag_count_character
@@ -47,35 +46,66 @@ class Post:
     #tag_count
     #updated_at
     #is_banned
+    pixiv_id: Optional[int]
+    #last_commented_at
+    #has_active_children
+    #bit_flags
+    #tag_count_meta
+    #has_large
+    #has_visible_children
+    #tag_string_general
+    #tag_string_character
+    character_tags: List[str]
+    #tag_string_copyright
+    #tag_string_artist
+    #tag_string_meta
+    file_url: str
+    large_file_url: str
+    preview_file_url: str
 
 
-class Danbooru:
+class DanbooruApi(ApiBase):
     BASE_URL = 'https://danbooru.donmai.us/'
-    USER_AGENT = 'Dowsing Rod v0.1'
 
-    def __init__(self, base_url=Danbooru.BASE_URL):
-        self.session = requests.Session()
-        self.session.headers['User-Agent'] = self.USER_AGENT
-        self.base_url = base_url
+    def __init__(self, base_url: Optional[str] = None):
+        super().__init__(base_url or self.BASE_URL)
 
-    def count_posts(self, tags: Sequence[str]):
+    def count_posts(self, tags: Sequence[str]) -> int:
         req = self._request('/counts/posts.json', tags=tags)
+        obj = json.loads(req.text)
+
+        return obj['counts']['posts']
 
     def posts(self, tags: Sequence[str], page=1) -> List[Post]:
         req = self._request('/posts.json', tags=tags, page=page)
+        obj = json.loads(req.text)
 
-    def _request(self, endpoint: str, tags: Optional[Sequence[str]] = None, headers={}, **kwargs):
-        if kwargs.get('tags'):
-            kwargs['tags'] = self._build_tags(kwargs['tags'])
+        posts = []
 
-        req = self.session.get(self._build_url(endpoint, **kwargs))
-        req.raise_for_status()
+        for post in obj:
+            try:
+                posts.append(Post(post.get('id', -1),
+                    datetime.fromisoformat(post['created_at']),
+                    post['source'],
+                    post['rating'],
+                    post['image_width'],
+                    post['image_height'],
+                    post['tag_string'].split(' '),
+                    post['file_ext'],
+                    post['file_size'],
+                    post.get('pixiv_id'),
+                    post['tag_string_character'].split(' '),
+                    post['file_url'],
+                    post['large_file_url'],
+                    post['preview_file_url']))
+            except:
+                print(post)
 
-        return req
+        return posts
 
-    def _build_url(self, endpoint: str, **kwargs):
-        return furl(self.base_url, kwargs, endpoint).url
+    def _request(self, endpoint: str, tags: Optional[Sequence[str]] = None, headers: dict[str, Any] = {}, **kwargs):
+        if tags is not None:
+            kwargs['tags'] = ' '.join(tags)
 
-    def _build_tags(self, tags: Sequence[str]):
-        return '+'.join(urlencode(x) for x in tags)
+        return super()._request(endpoint, headers, **kwargs)
 
