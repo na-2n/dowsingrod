@@ -1,6 +1,7 @@
 [DATABASE]
-name = 'postgresql'
-engine = 'peewee.PostgresqlDatabase'
+name = 'dowsingrod.db'
+engine = 'peewee.SqliteDatabase'
+#engine = 'peewee.PostgresqlDatabase'
 
 [DOWSINGROD]
 twitter_bearer_token = ''

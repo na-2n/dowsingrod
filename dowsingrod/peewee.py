@@ -69,7 +69,7 @@ class Database(object):
         if self._database.is_closed():
             self._database.connect()
 
-    def _close_db(self):
+    def _close_db(self, exc):
         if not self._database.is_closed():
             self._database.close()
 

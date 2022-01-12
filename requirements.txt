@@ -1,7 +1,6 @@
 ujson
 requests
 peewee
-psycopg2
 redis
 toml
 flask

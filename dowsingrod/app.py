@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.config.from_file('../config.toml', load=toml.load)
 
 limiter = Limiter(app, key_func=get_remote_address, default_limits=['2/second'])
-#db = Database(app)
+db = Database(app)
 lm = LoginManager(app)
 csrf = CSRFProtect(app)
 rod = DowsingRod(app)
