@@ -1,8 +1,9 @@
-from flask import Blueprint, request
+from flask import Blueprint
 
 
-admin = Blueprint(__name__, 'admin_blueprint')
+mod = Blueprint('admin', __name__, url_prefix='/admin')
 
-@admin.route('/login', method=['GET', 'POST'])
+@mod.route('/login', methods=['GET', 'POST'])
 def login():
+    pass
 

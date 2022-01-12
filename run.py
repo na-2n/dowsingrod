@@ -1,4 +1,4 @@
-from dowsingrod import app
+from dowsingrod.app import app
 
 if __name__ == '__main__':
     app.run()

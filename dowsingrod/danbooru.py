@@ -82,7 +82,7 @@ class DanbooruApi(ApiBase):
 
         posts = []
 
-        for post in obj:
+        for post in filter(lambda x: x.get('file_url') is not None, obj):
             try:
                 posts.append(Post(post.get('id', -1),
                     datetime.fromisoformat(post['created_at']),
@@ -99,6 +99,7 @@ class DanbooruApi(ApiBase):
                     post['large_file_url'],
                     post['preview_file_url']))
             except:
+                print('Error in post:')
                 print(post)
 
         return posts

@@ -37,7 +37,6 @@ class PixivEmbedApi(ApiBase):
 
         return PixivArtworkEmbed(art_id, obj['title'], author_id, obj['author_name'])
 
-
     def _query_url(self, url: str) -> Dict[str, Any]:
         req = self._request('/oembed.php', url=url, error=False)
 

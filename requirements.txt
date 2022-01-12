@@ -1,9 +1,10 @@
 ujson
 requests
 peewee
+psycopg2
+redis
+toml
 flask
-flask_peewee
-flask_redis
 flask_login
 flask_limiter
 flask_wtf

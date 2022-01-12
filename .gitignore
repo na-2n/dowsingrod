@@ -791,3 +791,4 @@ FodyWeavers.xsd
 
 *.db
 test*
+config.toml

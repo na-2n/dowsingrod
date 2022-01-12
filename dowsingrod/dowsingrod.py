@@ -1,10 +1,9 @@
-import requests
-
 from random import randrange, choice
 from math import ceil
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Sequence
 from furl import furl
+from flask import Flask
 
 from dowsingrod.danbooru import DanbooruApi
 from dowsingrod.twitter import TwitterApi, TwitterUser
@@ -53,12 +52,31 @@ class DowsingRod:
     TWITTER_DOMAINS = ['twitter.com']
     SEIGA_DOMAINS = ['seiga.nicovideo.jp']
 
-    def __init__(self, tags: list[str], twitter_key: str):
+    def __init__(
+        self,
+        app: Optional[Flask] = None,
+        tags: Optional[Sequence[str]] = [],
+        twitter_key: Optional[str] = None
+    ):
         self.danbooru = DanbooruApi()
-        self.twitter = TwitterApi(twitter_key)
         self.pixiv = PixivEmbedApi()
-        self._session = requests.Session()
+        self.twitter = None
         self._tags = tags
+
+        if app:
+            self.init_app(app)
+        else:
+            self.twitter = TwitterApi(twitter_key)
+
+    def init_app(self, app: Flask):
+        config = app.config['DOWSINGROD']
+
+        self._tags = config.get('tags', self._tags)
+        twitter_key = config.get('twitter_bearer_token')
+        if not twitter_key:
+            raise DowsingFailure(f'Twitter API key was not present in Flask config')
+
+        self.twitter = TwitterApi(twitter_key)
 
     def find_treasure(self) -> Image:
         post_count = self.danbooru.count_posts(self._tags)
