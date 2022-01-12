@@ -1,13 +1,16 @@
+
 from random import randrange, choice
 from math import ceil
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Dict, Any
+from redis import Redis
 from furl import furl
 from flask import Flask
 
 from dowsingrod.danbooru import DanbooruApi
 from dowsingrod.twitter import TwitterApi, TwitterUser
 from dowsingrod.pixiv import PixivEmbedApi, PixivNotFoundError
+from dowsingrod.cache import Cache, DumbCache, RedisCache
 
 
 class DowsingFailure(Exception):
@@ -46,17 +49,22 @@ class TwitterSource:
 
 
 class DowsingRod:
+    # TODO: clean up this class, it's a fucking mess right now
+
     POSTS_PER_REQ = 20
 
     PIXIV_DOMAINS = ['pximg.net', 'pixiv.net']
     TWITTER_DOMAINS = ['twitter.com']
     SEIGA_DOMAINS = ['seiga.nicovideo.jp']
 
+    EXPIRE_IN = 60 * 60 * 48  # 48 hours
+
     def __init__(
         self,
         app: Optional[Flask] = None,
         tags: Optional[Sequence[str]] = [],
-        twitter_key: Optional[str] = None
+        twitter_key: Optional[str] = None,
+        redis_args: Dict[str, Any] = {}
     ):
         self.danbooru = DanbooruApi()
         self.pixiv = PixivEmbedApi()
@@ -64,11 +72,12 @@ class DowsingRod:
         self._tags = tags
 
         if app:
-            self.init_app(app)
+            self.init_app(app, redis_args)
         else:
             self.twitter = TwitterApi(twitter_key)
+            self._cache = DumbCache()
 
-    def init_app(self, app: Flask):
+    def init_app(self, app: Flask, redis_args: Dict[str, Any] = {}):
         config = app.config['DOWSINGROD']
 
         self._tags = config.get('tags', self._tags)
@@ -77,6 +86,7 @@ class DowsingRod:
             raise DowsingFailure(f'Twitter API key was not present in Flask config')
 
         self.twitter = TwitterApi(twitter_key)
+        self._cache = RedisCache(config.get('redis_url', 'redis://localhost:6379/0'), **redis_args)
 
     def find_treasure(self) -> Image:
         post_count = self.danbooru.count_posts(self._tags)
@@ -93,7 +103,13 @@ class DowsingRod:
         source_type = "other"
 
         if post.source:
-            src = self._resolve_source(post.source)
+            src = self._cache.get(f'SOURCE_{post.id}')
+
+            if not src:
+                src = self._resolve_source(post.source)
+
+                if src:
+                    self._cache.set(f'SOURCE_{post.id}', src, expire=self.EXPIRE_IN)
 
             if src:
                 artist_name = src.artist_name
@@ -105,14 +121,19 @@ class DowsingRod:
 
     def _resolve_source(self, src_url: str) -> Optional[TreasureSource]:
         f = furl(src_url)
-        match = lambda seq: any(f.host.endswith(x) for x in seq)
+        def match(seq: Sequence[str]) -> bool:
+            return any(f.host.endswith(x) for x in seq)
 
         src = None
 
         if match(self.PIXIV_DOMAINS):
             art_id = self._parse_pixiv_url(src_url)
             try:
-                user = self._resolve_pixiv_user(art_id)
+                user = self._cache.get(f'PIXIV_{art_id}')
+
+                if not user:
+                    user = self._resolve_pixiv_user(art_id)
+                    self._cache.set(f'PIXIV_{art_id}', user, expire=self.EXPIRE_IN)
 
                 src = TreasureSource(f'https://pixiv.net/artworks/{art_id}', user.url, user.name, 'pixiv')
             except PixivNotFoundError:
@@ -120,9 +141,20 @@ class DowsingRod:
                 pass
         elif match(self.TWITTER_DOMAINS):
             twsrc = self._parse_twitter_url(src_url)
-            user = self._resolve_twitter_user(twsrc)
 
-            twurl = f'https://twitter.com/i/status/{twsrc.tweet_id}' if twsrc.tweet_id is not None else None
+            user = None
+
+            if twsrc.user:
+                user = self._cache.get(f'TWITTER_USER_{twsrc.user}')
+            elif twsrc.tweet_id:
+                user = self._cache.get(f'TWITTER_TWEET_{twsrc.tweet_id}')
+
+            if not user:
+                user = self._resolve_twitter_user(twsrc)
+                self._cache.set(f'TWITTER_USER_{twsrc.user}', user, expire=self.EXPIRE_IN)
+                self._cache.set(f'TWITTER_TWEET_{twsrc.tweet_id}', user, expire=self.EXPIRE_IN)
+
+            twurl = f'https://twitter.com/i/status/{twsrc.tweet_id}' if twsrc.tweet_id is not None else src_url
 
             if user:
                 src = TreasureSource(twurl, user.url, user.name, 'twitter')
