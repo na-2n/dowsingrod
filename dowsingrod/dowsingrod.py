@@ -1,4 +1,3 @@
-
 from random import randrange, choice
 from math import ceil
 from dataclasses import dataclass
@@ -207,7 +206,7 @@ class DowsingRod:
 
         if len(segs) > 1 and segs[1] == "status":
             tweet_id = segs[2] if len(segs) == 3 else None
-            user = segs[0] if segs[0] else None
+            user = segs[0] if segs[0] and segs[0] != 'i' else None
 
             return TwitterSource(user, tweet_id)
         else:
