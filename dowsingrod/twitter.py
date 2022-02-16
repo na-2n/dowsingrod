@@ -14,7 +14,7 @@ class TwitterError(Exception):
 
 
 class TwitterApiError(TwitterError):
-    def __init__(obj: Sequence[Dict[str, Any]]):
+    def __init__(self, obj: Sequence[Dict[str, Any]]):
         super().__init__('\n'.join(x['detail'] for x in obj))
 
 
