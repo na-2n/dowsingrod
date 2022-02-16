@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block head %}
+<script src="/js/script.js"></script>
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+{% endblock %}
+
+{% block content %}
+
+<a href="{{ src }}"
+   data-source-type="{{ treasure.source_type }}"
+   class="image-container">
+    <img id="image"
+         class="loading"
+         src="{{ treasure.image_preview }}"
+         data-og-src="{{ treasure.image }}"
+         data-danbooru-id="{{ treasure.id }}">
+</a>
+
+<div class="toolbar top-toolbar">
+    <a class="btn github" href="https://github.com/yuwui/dowsingrod">
+        <img class="service-icon" src="/img/icon-github.svg">
+        GitHub
+    </a>
+    <a class="btn report" id="report-button" href="#" onclick="showReport()">
+        <span class="material-icons">flag</span>
+        Report
+    </a>
+</div>
+
+<div class="toolbar bottom-toolbar">
+    {% if treasure.artist_name %}
+        <a class="btn artist-info" href="{{ treasure.artist_url }}" class="artist-name">
+            <!-- service-icon -->
+            {% if treasure.source_type == "twitter" %}
+                <img class="service-icon" src="/img/icon-twitter.svg">
+            {% elif treasure.source_type == "pixiv" %}
+                <img class="service-icon" src="/img/icon-pixiv.svg">
+            {% endif %}
+            <span class="artist-name">{{ treasure.artist_name }}</span>
+
+            <!-- link-icon -->
+            <!--<span class="material-icons">launch</span>-->
+        </a>
+    {% endif %}
+</div>
+
+<form id="report-form" style="display:none" method="POST" action="/report">
+    {{ form.csrf_token }}
+    <h3 class="form-title">Report Image</h3>
+    <p>
+        Please check for and correct any mistakes on <a href="https://danbooru.donmai.us/posts/{{ treasure.id }}">Danbooru</a>!
+    </p>
+    <label>
+        <input required type="radio" name="reason" value="nsfw">
+        NSFW
+    </label>
+    <label>
+        <input required type="radio" name="reason" value="unrelated">
+        Unrelated
+    </label>
+    <label>
+        <input required type="radio" name="reason" value="other">
+        Other
+    </label>
+    <h5 class="textarea-note">Additional info. EN/JP OK!</h5>
+    <textarea name="info"></textarea>
+    <div class="bottom-section">
+        <div
+            class="h-captcha"
+            data-sitekey="{{ hcaptcha.sitekey }}"
+            data-theme="light"
+            data-error-callback="captchaError">
+        </div>
+        <button role="submit">Submit</button>
+    </div>
+</form>
+
+{% endblock %}
+

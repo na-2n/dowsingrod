@@ -3,6 +3,7 @@ requests
 peewee
 redis
 toml
+furl
 flask
 flask_login
 flask_limiter

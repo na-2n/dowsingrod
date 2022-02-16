@@ -6,7 +6,7 @@ from dowsingrod.app import limiter, rod
 mod = Blueprint('api', __name__, url_prefix='/api')
 
 @mod.route('/random')
-@limiter.limit('2 per hour')
+#@limiter.limit('2 per hour')
 def random():
     treasure = rod.find_treasure()
 
