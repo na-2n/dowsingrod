@@ -1,3 +1,5 @@
+SECRET_KEY = 'v3rY5EcuR3'
+
 [DATABASE]
 name = 'dowsingrod.db'
 engine = 'peewee.SqliteDatabase'
@@ -5,7 +7,11 @@ engine = 'peewee.SqliteDatabase'
 
 [DOWSINGROD]
 twitter_bearer_token = ''
-tags = ['nazrin', 'rating:safe']
+tags = ['nazrin', 'rating:safe', '-comic']
 redis_url = 'redis://localhost:6379/0'
 update_interval = 3600 # seconds, 3600 = 60 * 60 = 1 hour
+
+[HCAPTCHA]
+sitekey = ''
+secret = ''
 
