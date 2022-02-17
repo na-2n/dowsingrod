@@ -24,16 +24,12 @@ def load_class(s):
 
 class Database(object):
     def __init__(self, app: Optional[Flask] = None):
-        if app:
-            self.init_app(app)
-
-        self.Model = self._get_model_class()
-
-    def init_app(self, app: Flask):
         self._app: Flask = app
 
         self._load_database()
         self._register_handlers()
+
+        self.Model = self._get_model_class()
 
     def _load_database(self):
         self._database_config = dict(self._app.config['DATABASE'])
@@ -58,10 +54,7 @@ class Database(object):
     def _get_model_class(self):
         class BaseModel(Model):
             class Meta:
-                @property
-                def database(_self):
-                    return self._database
-                #database = self._database
+                database = self._database
 
         return BaseModel
 

@@ -11,7 +11,7 @@
 
 <a href="{{ src }}"
    data-source-type="{{ treasure.source_type }}"
-   class="image-container">
+   id="image-container">
     <img id="image"
          class="loading"
          src="{{ treasure.image_preview }}"
@@ -20,19 +20,31 @@
 </a>
 
 <div class="toolbar top-toolbar">
-    <a class="btn github" href="https://github.com/yuwui/dowsingrod">
-        <img class="service-icon" src="/img/icon-github.svg">
-        GitHub
-    </a>
-    <a class="btn report" id="report-button" href="#" onclick="showReport()">
-        <span class="material-icons">flag</span>
-        Report
-    </a>
+    <!--
+    <div class="left">
+        <a class="btn round effect refresh" href="#" onclick="refreshImage()">
+            <span class="material-icons">refresh</span>
+        </a>
+        <a class="btn round effect" href="https://github.com/yuwui/dowsingrod">
+            <img class="service-icon" src="/img/icon-github.svg">
+        </a>
+    </div>
+    -->
+    <div class="right">
+        <a class="btn effect github" href="https://github.com/yuwui/dowsingrod">
+            <img class="service-icon" src="/img/icon-github.svg">
+            GitHub
+        </a>
+        <a class="btn report" id="report-button" href="#" onclick="toggleReport()">
+            <span class="material-icons">flag</span>
+            Report
+        </a>
+    </div>
 </div>
 
 <div class="toolbar bottom-toolbar">
     {% if treasure.artist_name %}
-        <a class="btn artist-info" href="{{ treasure.artist_url }}" class="artist-name">
+        <a class="btn effect artist-info" href="{{ treasure.artist_url }}" class="artist-name">
             <!-- service-icon -->
             {% if treasure.source_type == "twitter" %}
                 <img class="service-icon" src="/img/icon-twitter.svg">
@@ -47,26 +59,33 @@
     {% endif %}
 </div>
 
-<form id="report-form" style="display:none" method="POST" action="/report">
+<form id="report-form" style="display:none" method="POST" action="/report" onsubmit="submitForm(this);return false">
     {{ form.csrf_token }}
-    <h3 class="form-title">Report Image</h3>
+    <div class="top-section">
+        <h3 class="form-title">
+            Report Image
+        </h3>
+        <a class="icon-btn" onclick="toggleReport()">
+            <span class="material-icons">close</span>
+        </a>
+    </div>
     <p>
         Please check for and correct any mistakes on <a href="https://danbooru.donmai.us/posts/{{ treasure.id }}">Danbooru</a>!
     </p>
     <label>
-        <input required type="radio" name="reason" value="nsfw">
-        NSFW
+        <input required type="radio" name="reason" value="unrelated" selected>
+        Unrelated
     </label>
     <label>
-        <input required type="radio" name="reason" value="unrelated">
-        Unrelated
+        <input required type="radio" name="reason" value="nsfw">
+        NSFW
     </label>
     <label>
         <input required type="radio" name="reason" value="other">
         Other
     </label>
     <h5 class="textarea-note">Additional info. EN/JP OK!</h5>
-    <textarea name="info"></textarea>
+    <textarea maxlength="2048" required name="info"></textarea>
     <div class="bottom-section">
         <div
             class="h-captcha"

@@ -10,7 +10,11 @@ body {
     background-color: #313131;
 }
 
-.image-container {
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+#image-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,14 +45,24 @@ body {
     display: flex;
 }
 
+.toolbar .left {
+    flex: 1;
+    display: flex;
+    justify-content: left;
+}
+
+.toolbar .right {
+    flex: 1;
+    display: flex;
+    justify-content: right;
+}
+
 .bottom-toolbar {
     bottom: 0;
-    justify-content: left;
 }
 
 .top-toolbar {
     top: 0;
-    justify-content: right;
 }
 
 .btn {
@@ -63,6 +77,15 @@ body {
     transition: 0.2s;
 }
 
+.btn.round {
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.btn.round .material-icons {
+    margin: 0;
+}
+
 .btn.report {
     /*background-color: #FF1B1B;*/
     background-color: #E53935;
@@ -75,10 +98,13 @@ body {
 
 .btn:hover {
     border-radius: 10px;
+}
+
+.btn.effect:hover {
     transform: scale(0.9);
 }
 
-.btn:active {
+.btn.effect:active {
     transform: scale(0.8);
 }
 
@@ -93,6 +119,22 @@ body {
     margin-right: 10px;
 }
 
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0%);
+    }
+}
+
 #report-form {
     position: absolute;
     background: #FFFFFF;
@@ -100,6 +142,12 @@ body {
     padding: 20px;
     border-radius: 4px;
     z-index: 9999;
+
+    transition: 0.2s;
+
+    animation: slide-in 0.25s;
+
+    max-width: calc(100vw - 20px);
 }
 
 #report-form input {
@@ -120,10 +168,12 @@ body {
 #report-form textarea {
     display: block;
     margin: 10px 0;
+    padding: 8px;
 
     resize: vertical;
 
     width: 100%;
+    min-height: 8em;
 
     border: 2px solid black;
     border-radius: 8px 8px 0 8px;
@@ -137,6 +187,7 @@ body {
     margin-bottom: 10px;
 
     font-weight: bolder;
+    flex: 1;
 }
 
 #report-form .textarea-note {
@@ -178,5 +229,29 @@ body {
     display: flex;
     justify-content: center;
     margin: 20px 0;
+}
+
+#report-form .top-section {
+    display: flex;
+    flex-direction: row;
+}
+
+.icon-btn {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
+}
+
+.icon-btn > span {
+    transition: 0.2s;
+    border-radius: 3px;
+}
+
+.icon-btn:hover > span {
+    background: #E53935;
+    color: #FFFFFF;
 }
 

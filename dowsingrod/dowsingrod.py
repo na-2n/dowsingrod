@@ -7,7 +7,7 @@ from furl import furl
 from flask import Flask
 
 from dowsingrod.danbooru import DanbooruApi
-from dowsingrod.twitter import TwitterApi, TwitterUser
+from dowsingrod.twitter import TwitterApi, TwitterUser, TwitterApiError
 from dowsingrod.pixiv import PixivEmbedApi, PixivNotFoundError
 from dowsingrod.cache import Cache, DumbCache, RedisCache
 
@@ -149,9 +149,16 @@ class DowsingRod:
                 user = self._cache.get(f'TWITTER_TWEET_{twsrc.tweet_id}')
 
             if not user:
-                user = self._resolve_twitter_user(twsrc)
-                self._cache.set(f'TWITTER_USER_{twsrc.user}', user, expire=self.EXPIRE_IN)
-                self._cache.set(f'TWITTER_TWEET_{twsrc.tweet_id}', user, expire=self.EXPIRE_IN)
+                try:
+                    user = self._resolve_twitter_user(twsrc)
+
+                    if not user:
+                        return None
+
+                    self._cache.set(f'TWITTER_USER_{twsrc.user}', user, expire=self.EXPIRE_IN)
+                    self._cache.set(f'TWITTER_TWEET_{twsrc.tweet_id}', user, expire=self.EXPIRE_IN)
+                except TwitterApiError:
+                    return None
 
             twurl = f'https://twitter.com/i/status/{twsrc.tweet_id}' if twsrc.tweet_id is not None else src_url
 

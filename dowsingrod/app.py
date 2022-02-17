@@ -22,11 +22,19 @@ lm = LoginManager(app)
 csrf = CSRFProtect(app)
 rod = DowsingRod(app)
 
-from dowsingrod.models import User
+
+from dowsingrod.models import User, Report, BannedAddresses
 
 @lm.user_loader
 def load_user(uid):
     return User.get(uid)
+
+
+def create_tables():
+    User.create_table()
+    Report.create_table()
+    BannedAddresses.create_table()
+
 
 from dowsingrod.blueprints import api, admin, home
 

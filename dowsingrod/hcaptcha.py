@@ -45,6 +45,7 @@ class HCaptcha:
             response = request.json.get('h-captcha-response', '')
         else:
             response = request.form.get('h-captcha-response', '')
+
         remote_ip = request.remote_addr
 
         if not response:
