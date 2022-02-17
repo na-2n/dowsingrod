@@ -1,5 +1,5 @@
 document.addEventListener('readystatechange', () => {
-    const img = document.getElementById("image");
+    const img = document.querySelector("img#image");
     const src = img.getAttribute("data-og-src");
     const loader = new Image();
 

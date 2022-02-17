@@ -25,6 +25,7 @@ class Image:
     artist_name: Optional[str]
     image: str
     image_preview: str
+    image_ext: str
 
 
 @dataclass
@@ -105,7 +106,7 @@ class DowsingRod:
             src = self._cache.get(f'SOURCE_{post.id}')
 
             if not src:
-                src = self._resolve_source(post.source)
+                src = self._resolve_source(post.source or '')
 
                 if src:
                     self._cache.set(f'SOURCE_{post.id}', src, expire=self.EXPIRE_IN)
@@ -116,7 +117,14 @@ class DowsingRod:
                 source_url = src.url
                 source_type = src.type
 
-        return Image(post.id, source_type, source_url, artist_url, artist_name, post.large_file_url, post.preview_file_url)
+        return Image(post.id,
+                     source_type,
+                     source_url,
+                     artist_url,
+                     artist_name,
+                     post.large_file_url,
+                     post.preview_file_url,
+                     post.file_ext)
 
     def _resolve_source(self, src_url: str) -> Optional[TreasureSource]:
         f = furl(src_url)

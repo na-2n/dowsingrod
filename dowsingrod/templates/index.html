@@ -4,20 +4,35 @@
 
 {% block head %}
 <script src="/js/script.js"></script>
+<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 {% endblock %}
 
 {% block content %}
 
-<a href="{{ src }}"
-   data-source-type="{{ treasure.source_type }}"
-   id="image-container">
-    <img id="image"
-         class="loading"
-         src="{{ treasure.image_preview }}"
-         data-og-src="{{ treasure.image }}"
-         data-danbooru-id="{{ treasure.id }}">
-</a>
+{% if treasure.image_ext == 'swf' %}
+    <div id="image-container">
+        <object id="image" type="application/x-shockwave-flash" data="{{ treasure.image }}">
+            <param name="movie" value="{{ treasure.image }}" />
+            <param name="quality" value="high" />
+            <embed src="{{ treasure.image }}" quality="high" />
+        </object>
+    </div>
+{% elif treasure.image_ext in ['mp4', 'webm'] %}
+    <div id="image-container">
+        <video controls id="image" type="video/{{ treasure.image_ext }}" src="{{ treasure.image }}">
+    </div>
+{% else %}
+    <a href="{{ src }}"
+       data-source-type="{{ treasure.source_type }}"
+       id="image-container">
+        <img id="image"
+             class="loading"
+             src="{{ treasure.image_preview }}"
+             data-og-src="{{ treasure.image }}"
+             data-danbooru-id="{{ treasure.id }}">
+    </a>
+{% endif %}
 
 <div class="toolbar top-toolbar">
     <!--

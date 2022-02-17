@@ -7,7 +7,7 @@ engine = 'peewee.SqliteDatabase'
 
 [DOWSINGROD]
 twitter_bearer_token = ''
-tags = ['nazrin', 'rating:safe', '-comic']
+tags = ['nazrin', 'rating:safe']
 redis_url = 'redis://localhost:6379/0'
 update_interval = 3600 # seconds, 3600 = 60 * 60 = 1 hour
 
